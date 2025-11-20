@@ -298,19 +298,6 @@
         </div>
 
         <div class="form-full">
-          <label for="adminCode">Admin override (optional)</label>
-          <input
-            type="text"
-            id="adminCode"
-            name="adminCode"
-            placeholder="Admin code to allow overlapping dates"
-          />
-          <div class="helper-text">
-            Leave blank for normal bookings. Admin only.
-          </div>
-        </div>
-
-        <div class="form-full">
           <label for="notes">Notes (optional)</label>
           <textarea
             id="notes"
@@ -437,7 +424,6 @@
         const startDateStr = startDateInput.value;
         const endDateStr = endDateInput.value;
         const notes = document.getElementById("notes").value.trim();
-        const adminCode = document.getElementById("adminCode").value.trim();
 
         const errorDiv = document.getElementById("errorMessage");
         errorDiv.style.display = "none";
@@ -505,3 +491,4 @@
   </script>
 </body>
 </html>
+
