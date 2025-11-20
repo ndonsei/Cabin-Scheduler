@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Family Cabin Scheduler</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1f2937, #111827);
+      color: white;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      letter-spacing: 0.03em;
+    }
+
+    header p {
+      margin: 0.4rem 0 0;
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 1.5rem auto;
+      padding: 0 1rem 2rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      grid-gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: white;
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.09);
+      border: 1px solid #e5e7eb;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .card h2 span.icon {
+      font-size: 1.3rem;
+    }
+
+    .card p {
+      margin: 0.4rem 0 0.8rem;
+      font-size: 0.9rem;
+      color: #4b5563;
+    }
+
+    .grid-full {
+      grid-column: 1 / -1;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-gap: 0.75rem 1rem;
+      margin-top: 0.75rem;
+      align-items: start;
+    }
+
+    .form-full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.2rem;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    textarea {
+      width: 100%;
+      padding: 0.5rem 0.6rem;
+      border-radius: 0.5rem;
+      border: 1px solid #d1d5db;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      background: #f9fafb;
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    textarea:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
+      background: white;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .helper-text {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 0.15rem;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 999px;
+      padding: 0.55rem 1.3rem;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      box-shadow: 0 10px 15px rgba(79, 70, 229, 0.25);
+      transition: transform 0.08s ease, box-shadow 0.08s ease,
+        filter 0.08s ease;
+      margin-top: 0.3rem;
+    }
+
+    button:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+      box-shadow: 0 14px 25px rgba(79, 70, 229, 0.35);
+    }
+
+    button:active {
+      filter: brightness(0.98);
+      transform: translateY(1px);
+      box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    button.secondary {
+      background: transparent;
+      color: #4b5563;
+      box-shadow: none;
+      border: 1px solid #d1d5db;
+    }
+
+    button.secondary:hover {
+      background: #f3f4f6;
+      box-shadow: none;
+      transform: translateY(0);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+
+    iframe {
+      width: 100%;
+      border: 0;
+      border-radius: 0.5rem;
+    }
+
+    .calendar-embed {
+      min-height: 450px;
+    }
+
+    .agenda-embed {
+      min-height: 300px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: #eef2ff;
+      color: #4338ca;
+      font-weight: 500;
+      gap: 0.25rem;
+    }
+
+    .pill span {
+      font-size: 0.85rem;
+    }
+
+    .footer-note {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 0.8rem;
+    }
+
+    .error {
+      color: #b91c1c;
+      font-size: 0.8rem;
+      margin-top: 0.25rem;
+    }
+
+    .status {
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      padding: 0.4rem 0.6rem;
+      border-radius: 0.5rem;
+    }
+
+    .status.success {
+      background: #ecfdf5;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .status.fail {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Family Cabin Scheduler</h1>
+    <p>Pick your dates, book the cabin, and keep everyone in sync.</p>
+  </header>
+
+  <main>
+    <!-- BOOKING CARD -->
+    <section class="card">
+      <h2><span class="icon">📅</span>Book Cabin Time</h2>
+      <p>
+        Fill this out to book the cabin directly on the shared
+        <strong>Cabin Calendar</strong>. No extra steps.
+      </p>
+
+      <div class="pill">
+        <span>ℹ️</span> End date is your last night at the cabin.
+      </div>
+
+      <form id="bookingForm">
+        <div class="form-full">
+          <label for="guestName">Who is staying?</label>
+          <input
+            type="text"
+            id="guestName"
+            name="guestName"
+            placeholder="e.g., Nick & Family"
+            required
+          />
+          <div class="helper-text">This will be part of the event title.</div>
+        </div>
+
+        <div>
+          <label for="startDate">Start date (arrival)</label>
+          <input type="date" id="startDate" name="startDate" required />
+        </div>
+
+        <div>
+          <label for="endDate">End date (last night)</label>
+          <input type="date" id="endDate" name="endDate" required />
+          <div class="helper-text">
+            We’ll block nights from start through this date.
+          </div>
+        </div>
+
+        <div class="form-full">
+          <label for="notes">Notes (optional)</label>
+          <textarea
+            id="notes"
+            name="notes"
+            placeholder="Who is coming, pets, special plans, etc."
+          ></textarea>
+        </div>
+
+        <div class="form-full">
+          <div class="button-row">
+            <button type="button" id="bookBtn">
+              Book Cabin Stay
+            </button>
+          </div>
+          <div id="errorMessage" class="error" style="display:none;"></div>
+          <div id="bookingStatus" class="status" style="display:none;"></div>
+        </div>
+      </form>
+
+      <p class="footer-note">
+        Once booked, your stay will appear below in the Upcoming Bookings and
+        the Cabin Calendar. You may need to refresh after a new booking.
+      </p>
+    </section>
+
+    <!-- UPCOMING BOOKINGS CARD -->
+    <section class="card">
+      <h2><span class="icon">📋</span>Upcoming Bookings</h2>
+      <p>
+        This agenda view shows the next cabin stays on the shared calendar.
+      </p>
+
+      <iframe
+        class="agenda-embed"
+        src="https://calendar.google.com/calendar/embed?showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&mode=AGENDA&height=300&wkst=1&bgcolor=%23ffffff&src=manitowishcabin%40doneleer.com&ctz=America%2FChicago"
+      ></iframe>
+
+      <p class="footer-note">
+        If nothing is showing here, either there are no upcoming bookings or
+        the calendar isn’t shared / public yet.
+      </p>
+    </section>
+
+    <!-- FULL CALENDAR CARD -->
+    <section class="card grid-full">
+      <h2><span class="icon">🗓️</span>Cabin Calendar</h2>
+      <p>
+        Month view of all bookings. Everyone can subscribe to this calendar on
+        their phone so cabin dates show up alongside their normal schedule.
+      </p>
+
+      <iframe
+        class="calendar-embed"
+        src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=America%2FChicago&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&mode=MONTH&src=manitowishcabin%40doneleer.com"
+      ></iframe>
+
+      <div class="button-row">
+        <button type="button" class="secondary" onclick="openSubscribeLink()">
+          Subscribe to Cabin Calendar
+        </button>
+      </div>
+
+      <p class="footer-note">
+        On phones, use the subscribe button or the calendar’s iCal link so
+        future bookings automatically appear.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    // ====== CONFIG: your backend + calendar ======
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTf3E5lUtsUtgUxcj4aLYvd5PkGQJEm0bxBM0XF2k2XbXbdZUOAg-I5C6K9WabEaKx1g/exec";
+    const CABIN_CALENDAR_ID = "manitowishcabin@doneleer.com";
+
+    const SUBSCRIBE_LINK =
+      "https://calendar.google.com/calendar/u/0?cid=" +
+      encodeURIComponent(CABIN_CALENDAR_ID);
+
+    function openSubscribeLink() {
+      window.open(SUBSCRIBE_LINK, "_blank");
+    }
+
+    function setStatus(message, isSuccess) {
+      const statusDiv = document.getElementById("bookingStatus");
+      statusDiv.style.display = "block";
+      statusDiv.textContent = message || "";
+      statusDiv.className = "status " + (isSuccess ? "success" : "fail");
+    }
+
+    document
+      .getElementById("bookBtn")
+      .addEventListener("click", function () {
+        const guestName = document
+          .getElementById("guestName")
+          .value.trim();
+        const startDateStr = document.getElementById("startDate").value;
+        const endDateStr = document.getElementById("endDate").value;
+        const notes = document.getElementById("notes").value.trim();
+
+        const errorDiv = document.getElementById("errorMessage");
+        errorDiv.style.display = "none";
+        errorDiv.textContent = "";
+        document.getElementById("bookingStatus").style.display = "none";
+
+        if (!guestName || !startDateStr || !endDateStr) {
+          errorDiv.textContent =
+            "Please fill in who is staying, start date, and end date.";
+          errorDiv.style.display = "block";
+          return;
+        }
+
+        const startDate = new Date(startDateStr + "T00:00:00");
+        const endDateInclusive = new Date(endDateStr + "T00:00:00");
+        if (endDateInclusive < startDate) {
+          errorDiv.textContent =
+            "End date must be the same as or after the start date.";
+          errorDiv.style.display = "block";
+          return;
+        }
+
+        if (!SCRIPT_URL) {
+          errorDiv.textContent =
+            "Booking backend not configured. Ask Nick to add the web app URL.";
+          errorDiv.style.display = "block";
+          return;
+        }
+
+        const bookBtn = document.getElementById("bookBtn");
+        const originalText = bookBtn.textContent;
+        bookBtn.textContent = "Booking...";
+        bookBtn.disabled = true;
+
+        // Send URL-encoded form data (simple POST)
+        const formData = new URLSearchParams();
+        formData.append("guestName", guestName);
+        formData.append("startDate", startDateStr);
+        formData.append("endDate", endDateStr);
+        formData.append("notes", notes);
+
+        fetch(SCRIPT_URL, {
+          method: "POST",
+          body: formData
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              setStatus(data.message || "Cabin stay booked!", true);
+              // Optionally clear form:
+              // document.getElementById("bookingForm").reset();
+            } else {
+              setStatus(data.message || "Booking failed.", false);
+            }
+          })
+          .catch((err) => {
+            setStatus("Booking error: " + err, false);
+          })
+          .finally(() => {
+            bookBtn.textContent = originalText;
+            bookBtn.disabled = false;
+          });
+      });
+  </script>
+</body>
+</html>
