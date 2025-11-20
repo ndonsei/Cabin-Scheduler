@@ -430,7 +430,7 @@
         bookBtn.textContent = "Booking...";
         bookBtn.disabled = true;
 
-        // Send URL-encoded form data (simple POST)
+        // Send URL-encoded form data as "fire and forget"
         const formData = new URLSearchParams();
         formData.append("guestName", guestName);
         formData.append("startDate", startDateStr);
@@ -439,20 +439,24 @@
 
         fetch(SCRIPT_URL, {
           method: "POST",
-          body: formData
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: formData.toString()
         })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              setStatus(data.message || "Cabin stay booked!", true);
-              // Optionally clear form:
-              // document.getElementById("bookingForm").reset();
-            } else {
-              setStatus(data.message || "Booking failed.", false);
-            }
+          .then(() => {
+            // We can't read the response because of no-cors,
+            // so we just assume it worked and tell the user to verify on the calendar.
+            setStatus(
+              "Booking request sent! Check the cabin calendar in a few seconds to confirm your stay is listed.",
+              true
+            );
+            // Optional: clear form
+            // document.getElementById("bookingForm").reset();
           })
           .catch((err) => {
-            setStatus("Booking error: " + err, false);
+            setStatus("Booking error (network): " + err, false);
           })
           .finally(() => {
             bookBtn.textContent = originalText;
