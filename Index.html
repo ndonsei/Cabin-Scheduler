@@ -250,8 +250,19 @@
       color: #991b1b;
       border: 1px solid #fecaca;
     }
+
+    /* NEW: Subscribe section heading */
+    .subscribe-header {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-top: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
   </style>
 </head>
+
+
+
 <body>
   <header>
     <h1>Manitowish Cabin Scheduler</h1>
@@ -263,8 +274,8 @@
     <section class="card">
       <h2><span class="icon">📅</span>Book Cabin Time</h2>
       <p>
-        Fill this out to book the cabin directly on the shared
-        <strong>Cabin Calendar</strong>. Subscribe to the Calendar Below!.
+        Fill this out to book your stay on the shared
+        <strong>Cabin Calendar</strong>.
       </p>
 
       <div class="pill">
@@ -281,7 +292,7 @@
             placeholder="e.g., Leer Family"
             required
           />
-          <div class="helper-text">This will be part of the event title.</div>
+          <div class="helper-text">This will appear on the calendar.</div>
         </div>
 
         <div>
@@ -318,22 +329,19 @@
       </form>
 
       <p class="footer-note">
-        Once booked, your stay will appear below in Upcoming Bookings and
-        in the Cabin Calendar. They should update automatically right after booking.
+        Once booked, your stay will appear below in Upcoming Bookings and in the Cabin Calendar.
       </p>
     </section>
 
-    <!-- UPCOMING BOOKINGS (BLOCK VIEW) -->
+    <!-- UPCOMING BOOKINGS -->
     <section class="card">
       <h2><span class="icon">📋</span>Upcoming Bookings</h2>
-      <p>
-        Shows each cabin stay as a single block with who is staying and the date range.
-      </p>
+      <p>Shows each cabin stay as a single block with the date range.</p>
 
       <iframe
         class="bookings-embed"
         id="bookingsFrame"
-        src="https://script.google.com/a/macros/doneleer.com/s/AKfycbxImE99G_VSfD9MuI-TTKyhXPeQVmiC9k9ew9LV9GZ2OmyLp0Okdfix5uGyU6Hwrtitpw/exec?anonymous"
+        src="https://script.google.com/a/macros/doneleer.com/s/AKfycbxImE99G_VSfD9MuI-TTKyhXPeQVmiC9k9ew9LV9GZ2OmyLp0Okdfix5uGyU6Hwrtitpw/exec?anonymous=1"
       ></iframe>
 
       <p class="footer-note">
@@ -341,12 +349,11 @@
       </p>
     </section>
 
-    <!-- FULL CALENDAR CARD -->
+    <!-- FULL CALENDAR + SUBSCRIBE -->
     <section class="card grid-full">
       <h2><span class="icon">🗓️</span>Cabin Calendar</h2>
       <p>
-        Month view of all bookings. Everyone can subscribe to this calendar on
-        their phone so cabin dates show up alongside their normal schedule.
+        View the cabin schedule. You can also subscribe below so events sync to your phone automatically.
       </p>
 
       <iframe
@@ -355,31 +362,46 @@
         src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=America%2FChicago&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&mode=MONTH&src=manitowishcabin%40doneleer.com"
       ></iframe>
 
+      <!-- NEW: Subscribe Header -->
+      <div class="subscribe-header">Subscribe to Calendar</div>
+
       <div class="button-row">
-        <button type="button" class="secondary" onclick="openSubscribeLink()">
-          Subscribe to Cabin Calendar
+        <button type="button" class="secondary" onclick="openAppleSubscribeLink()">
+          Apple Calendar
+        </button>
+
+        <button type="button" class="secondary" onclick="openGoogleSubscribeLink()">
+          Google Calendar
         </button>
       </div>
 
       <p class="footer-note">
-        On phones, use the subscribe button or the calendar’s iCal link so
-        future bookings automatically appear.
+        Subscribing keeps the cabin schedule automatically updated on your device.
       </p>
     </section>
   </main>
 
+
+
+
   <script>
     // ====== CONFIG: backend + calendar ======
     const SCRIPT_URL =
-      "https://script.google.com/a/macros/doneleer.com/s/AKfycbxImE99G_VSfD9MuI-TTKyhXPeQVmiC9k9ew9LV9GZ2OmyLp0Okdfix5uGyU6Hwrtitpw/exec?anonymous";
-    const CABIN_CALENDAR_ID = "manitowishcabin@doneleer.com";
+      "https://script.google.com/a/macros/doneleer.com/s/AKfycbxImE99G_VSfD9MuI-TTKyhXPeQVmiC9k9ew9LV9GZ2OmyLp0Okdfix5uGyU6Hwrtitpw/exec?anonymous=1";
 
-    const SUBSCRIBE_LINK =
-      "https://calendar.google.com/calendar/u/0?cid=" +
-      encodeURIComponent(CABIN_CALENDAR_ID);
+    const GOOGLE_CID = "manitowishcabin@doneleer.com";
+    const ICAL_URL =
+      "webcal://calendar.google.com/calendar/ical/manitowishcabin%40doneleer.com/public/basic.ics";
 
-    function openSubscribeLink() {
-      window.open(SUBSCRIBE_LINK, "_blank");
+    function openAppleSubscribeLink() {
+      window.location.href = ICAL_URL;
+    }
+
+    function openGoogleSubscribeLink() {
+      const link =
+        "https://calendar.google.com/calendar/u/0?cid=" +
+        encodeURIComponent(GOOGLE_CID);
+      window.open(link, "_blank");
     }
 
     function setStatus(message, isSuccess) {
@@ -392,10 +414,9 @@
     function refreshEmbeds() {
       const bookingsFrame = document.getElementById("bookingsFrame");
       if (bookingsFrame) {
-        const base = bookingsFrame.src.split("?")[0];
-        bookingsFrame.src =
-          base + "?anonymous=1&t=" + Date.now();
+        bookingsFrame.src = SCRIPT_URL + "&t=" + Date.now();
       }
+
       const calFrame = document.getElementById("calendarFrame");
       if (calFrame) {
         const base = calFrame.src.split("&t=")[0];
@@ -403,7 +424,7 @@
       }
     }
 
-    // Date UX: end date can't be before start date, and auto-populates
+    // ===== Date UX =====
     const startDateInput = document.getElementById("startDate");
     const endDateInput = document.getElementById("endDate");
 
@@ -415,12 +436,11 @@
       }
     });
 
+    // ===== Booking =====
     document
       .getElementById("bookBtn")
       .addEventListener("click", function () {
-        const guestName = document
-          .getElementById("guestName")
-          .value.trim();
+        const guestName = document.getElementById("guestName").value.trim();
         const startDateStr = startDateInput.value;
         const endDateStr = endDateInput.value;
         const notes = document.getElementById("notes").value.trim();
@@ -446,13 +466,6 @@
           return;
         }
 
-        if (!SCRIPT_URL) {
-          errorDiv.textContent =
-            "Booking backend not configured. Ask Nick to add the web app URL.";
-          errorDiv.style.display = "block";
-          return;
-        }
-
         const bookBtn = document.getElementById("bookBtn");
         const originalText = bookBtn.textContent;
         bookBtn.textContent = "Booking...";
@@ -463,7 +476,6 @@
         formData.append("startDate", startDateStr);
         formData.append("endDate", endDateStr);
         formData.append("notes", notes);
-
 
         fetch(SCRIPT_URL, {
           method: "POST",
@@ -478,10 +490,10 @@
               "Booking request sent! Check the cabin calendar in a few seconds to confirm your stay is listed.",
               true
             );
-            setTimeout(refreshEmbeds, 4000);
+            setTimeout(refreshEmbeds, 3500);
           })
           .catch((err) => {
-            setStatus("Booking error (network): " + err, false);
+            setStatus("Booking error: " + err, false);
           })
           .finally(() => {
             bookBtn.textContent = originalText;
@@ -489,8 +501,6 @@
           });
       });
   </script>
+
 </body>
 </html>
-
-
-
