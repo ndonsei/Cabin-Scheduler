@@ -343,11 +343,10 @@
         Shows each cabin stay as a single block with who is staying and the date range.
       </p>
 
-      <!-- This iframe is rendered by the Apps Script web app (block-style list + "in use" banner). -->
       <iframe
         class="bookings-embed"
         id="bookingsFrame"
-        src="https://script.google.com/macros/s/AKfycbzTf3E5lUtsUtgUxcj4aLYvd5PkGQJEm0bxBM0XF2k2XbXbdZUOAg-I5C6K9WabEaKx1g/exec"
+        src="https://script.google.com/a/macros/doneleer.com/s/AKfycbxImE99G_VSfD9MuI-TTKyhXPeQVmiC9k9ew9LV9GZ2OmyLp0Okdfix5uGyU6Hwrtitpw/exec?anonymous"
       ></iframe>
 
       <p class="footer-note">
@@ -383,8 +382,9 @@
   </main>
 
   <script>
-    // ====== CONFIG: your backend + calendar ======
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTf3E5lUtsUtgUxcj4aLYvd5PkGQJEm0bxBM0XF2k2XbXbdZUOAg-I5C6K9WabEaKx1g/exec";
+    // ====== CONFIG: backend + calendar ======
+    const SCRIPT_URL =
+      "https://script.google.com/a/macros/doneleer.com/s/AKfycbxImE99G_VSfD9MuI-TTKyhXPeQVmiC9k9ew9LV9GZ2OmyLp0Okdfix5uGyU6Hwrtitpw/exec?anonymous";
     const CABIN_CALENDAR_ID = "manitowishcabin@doneleer.com";
 
     const SUBSCRIBE_LINK =
@@ -403,13 +403,12 @@
     }
 
     function refreshEmbeds() {
-      // Force refresh the upcoming bookings iframe
       const bookingsFrame = document.getElementById("bookingsFrame");
       if (bookingsFrame) {
         const base = bookingsFrame.src.split("?")[0];
-        bookingsFrame.src = base + "?t=" + Date.now();
+        bookingsFrame.src =
+          base + "?anonymous=1&t=" + Date.now();
       }
-      // Force refresh the main calendar iframe
       const calFrame = document.getElementById("calendarFrame");
       if (calFrame) {
         const base = calFrame.src.split("&t=")[0];
@@ -424,7 +423,6 @@
     startDateInput.addEventListener("change", () => {
       if (!startDateInput.value) return;
       endDateInput.min = startDateInput.value;
-      // If endDate is empty or before startDate, set it equal to startDate
       if (!endDateInput.value || endDateInput.value < startDateInput.value) {
         endDateInput.value = startDateInput.value;
       }
@@ -474,7 +472,6 @@
         bookBtn.textContent = "Booking...";
         bookBtn.disabled = true;
 
-        // Send URL-encoded form data as "fire and forget"
         const formData = new URLSearchParams();
         formData.append("guestName", guestName);
         formData.append("startDate", startDateStr);
@@ -495,7 +492,6 @@
               "Booking request sent! Check the cabin calendar in a few seconds to confirm your stay is listed.",
               true
             );
-            // Auto-refresh the embeds so new booking shows quickly
             setTimeout(refreshEmbeds, 4000);
           })
           .catch((err) => {
