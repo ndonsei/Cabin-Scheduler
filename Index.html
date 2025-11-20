@@ -463,7 +463,7 @@
         formData.append("startDate", startDateStr);
         formData.append("endDate", endDateStr);
         formData.append("notes", notes);
-        if (adminCode) formData.append("adminCode", adminCode);
+
 
         fetch(SCRIPT_URL, {
           method: "POST",
@@ -491,5 +491,6 @@
   </script>
 </body>
 </html>
+
 
 
