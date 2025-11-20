@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Manitowish Cabin Scheduler</title>
+  <title>Family Cabin Scheduler</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     * {
@@ -200,8 +200,8 @@
       min-height: 450px;
     }
 
-    .agenda-embed {
-      min-height: 300px;
+    .bookings-embed {
+      min-height: 260px;
     }
 
     .pill {
@@ -254,7 +254,7 @@
 </head>
 <body>
   <header>
-    <h1>Manitowish Cabin Scheduler</h1>
+    <h1>Family Cabin Scheduler</h1>
     <p>Pick your dates, book the cabin, and keep everyone in sync.</p>
   </header>
 
@@ -264,7 +264,7 @@
       <h2><span class="icon">📅</span>Book Cabin Time</h2>
       <p>
         Fill this out to book the cabin directly on the shared
-        <strong>Cabin Calendar</strong>. Subscribe to the Calendar below
+        <strong>Cabin Calendar</strong>. No extra steps.
       </p>
 
       <div class="pill">
@@ -298,6 +298,19 @@
         </div>
 
         <div class="form-full">
+          <label for="adminCode">Admin override (optional)</label>
+          <input
+            type="text"
+            id="adminCode"
+            name="adminCode"
+            placeholder="Admin code to allow overlapping dates"
+          />
+          <div class="helper-text">
+            Leave blank for normal bookings. Admin only.
+          </div>
+        </div>
+
+        <div class="form-full">
           <label for="notes">Notes (optional)</label>
           <textarea
             id="notes"
@@ -318,26 +331,27 @@
       </form>
 
       <p class="footer-note">
-        Once booked, your stay will appear below in the Upcoming Bookings and
-        the Cabin Calendar. You may need to refresh after a new booking.
+        Once booked, your stay will appear below in Upcoming Bookings and
+        in the Cabin Calendar. They should update automatically right after booking.
       </p>
     </section>
 
-    <!-- UPCOMING BOOKINGS CARD -->
+    <!-- UPCOMING BOOKINGS (BLOCK VIEW) -->
     <section class="card">
       <h2><span class="icon">📋</span>Upcoming Bookings</h2>
       <p>
-        This agenda view shows the next cabin stays on the shared calendar.
+        Shows each cabin stay as a single block with who is staying and the date range.
       </p>
 
+      <!-- This iframe is rendered by the Apps Script web app (block-style list + "in use" banner). -->
       <iframe
-        class="agenda-embed"
-        src="https://calendar.google.com/calendar/embed?showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&mode=AGENDA&height=300&wkst=1&bgcolor=%23ffffff&src=manitowishcabin%40doneleer.com&ctz=America%2FChicago"
+        class="bookings-embed"
+        id="bookingsFrame"
+        src="https://script.google.com/macros/s/AKfycbzTf3E5lUtsUtgUxcj4aLYvd5PkGQJEm0bxBM0XF2k2XbXbdZUOAg-I5C6K9WabEaKx1g/exec"
       ></iframe>
 
       <p class="footer-note">
-        If nothing is showing here, either there are no upcoming bookings or
-        the calendar isn’t shared / public yet.
+        If you don’t see your booking yet, it may take a few seconds for Google Calendar to update.
       </p>
     </section>
 
@@ -351,6 +365,7 @@
 
       <iframe
         class="calendar-embed"
+        id="calendarFrame"
         src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=America%2FChicago&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&mode=MONTH&src=manitowishcabin%40doneleer.com"
       ></iframe>
 
@@ -387,15 +402,44 @@
       statusDiv.className = "status " + (isSuccess ? "success" : "fail");
     }
 
+    function refreshEmbeds() {
+      // Force refresh the upcoming bookings iframe
+      const bookingsFrame = document.getElementById("bookingsFrame");
+      if (bookingsFrame) {
+        const base = bookingsFrame.src.split("?")[0];
+        bookingsFrame.src = base + "?t=" + Date.now();
+      }
+      // Force refresh the main calendar iframe
+      const calFrame = document.getElementById("calendarFrame");
+      if (calFrame) {
+        const base = calFrame.src.split("&t=")[0];
+        calFrame.src = base + "&t=" + Date.now();
+      }
+    }
+
+    // Date UX: end date can't be before start date, and auto-populates
+    const startDateInput = document.getElementById("startDate");
+    const endDateInput = document.getElementById("endDate");
+
+    startDateInput.addEventListener("change", () => {
+      if (!startDateInput.value) return;
+      endDateInput.min = startDateInput.value;
+      // If endDate is empty or before startDate, set it equal to startDate
+      if (!endDateInput.value || endDateInput.value < startDateInput.value) {
+        endDateInput.value = startDateInput.value;
+      }
+    });
+
     document
       .getElementById("bookBtn")
       .addEventListener("click", function () {
         const guestName = document
           .getElementById("guestName")
           .value.trim();
-        const startDateStr = document.getElementById("startDate").value;
-        const endDateStr = document.getElementById("endDate").value;
+        const startDateStr = startDateInput.value;
+        const endDateStr = endDateInput.value;
         const notes = document.getElementById("notes").value.trim();
+        const adminCode = document.getElementById("adminCode").value.trim();
 
         const errorDiv = document.getElementById("errorMessage");
         errorDiv.style.display = "none";
@@ -436,6 +480,7 @@
         formData.append("startDate", startDateStr);
         formData.append("endDate", endDateStr);
         formData.append("notes", notes);
+        if (adminCode) formData.append("adminCode", adminCode);
 
         fetch(SCRIPT_URL, {
           method: "POST",
@@ -446,14 +491,12 @@
           body: formData.toString()
         })
           .then(() => {
-            // We can't read the response because of no-cors,
-            // so we just assume it worked and tell the user to verify on the calendar.
             setStatus(
               "Booking request sent! Check the cabin calendar in a few seconds to confirm your stay is listed.",
               true
             );
-            // Optional: clear form
-            // document.getElementById("bookingForm").reset();
+            // Auto-refresh the embeds so new booking shows quickly
+            setTimeout(refreshEmbeds, 4000);
           })
           .catch((err) => {
             setStatus("Booking error (network): " + err, false);
@@ -466,6 +509,3 @@
   </script>
 </body>
 </html>
-
-
-
